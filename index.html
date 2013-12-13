@@ -1,0 +1,890 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+	<title>Star Collector (Three.js)</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+	<link rel=stylesheet href="css/base.css"/>
+	<style>
+			body {
+				background:yellow;
+				color:#fff;
+				padding:0;
+				margin:0;
+				overflow:hidden;
+				font-family:georgia;
+				text-align:center;
+				height: auto;
+				cursor: url(/images/santa-sack.png), pointer;
+			}
+
+			#info {
+				position: absolute;
+				top: 0px; width: 100%;
+				padding: 5px;
+				font-family: Monospace;
+				font-size: 13px;
+				text-align: center;
+				z-index:100;
+			}
+
+			#progress {
+				color:red;
+				top:7em;
+				width: 100%;
+				font-size:3em;
+				font-variant:small-caps;
+				font-weight:bold;
+				position:absolute;
+				z-index:100;
+				text-align: center;
+				text-shadow: #000 0px 0px 10px;
+				/*display:none;*/
+			}
+
+			#start {
+				color:#fff;
+				text-shadow: #000 0px 0px 2px;
+				padding:0.1em 0.3em;
+				width:3em;
+				text-align: center;
+				display:none;
+			}
+
+			.shadow {
+				-moz-box-shadow: 0px 0px 5px #000;
+				-webkit-box-shadow: 0px 0px 5px #000;
+				box-shadow: 0px 0px 5px #000;
+			}
+
+			#progressbar {
+				text-align: center;
+				background: white;
+				width: 250px;
+				height: 10px;
+			}
+
+			#bar {
+				background:#d00;
+				width:50px;
+				height:10px;
+			}
+
+			.enabled {
+				color: lime!important;
+				cursor:pointer;
+			}
+
+			.enabled:hover {
+				text-shadow: #0f0 0px 0px 5px !important;
+			}
+
+			.disabled {
+				background:gray;
+				cursor:default;
+			}
+
+			a { color:red }
+			canvas { pointer-events:none; z-index:10; }
+
+			#scene_explorer {
+				background:transparent;
+				color:#fff;
+				width:200px;
+				position:absolute;
+				text-align:left;
+				top:0px;
+				z-index:200;
+				overflow:auto;
+			}
+
+			#section_exp {
+				background:rgba(0,0,50,0.5);
+				padding:0.5em 0;
+				display:none;
+			}
+
+			#scene_explorer h3 {
+				font-size:1em;
+				padding:0;
+				margin:0;
+				color:orange;
+			}
+
+			#scene_explorer a {
+				color:#555;
+				font-weight:bold;
+				text-decoration:none;
+				font-size:1.2em;
+				font-family:Monospace;
+			}
+			#scene_explorer a:hover {
+				background:#555;
+				color:rgba(0,0,50,1);
+			}
+
+			.part {
+				display:none;
+				padding:0 0 0.5em 2em;
+			}
+
+		</style>
+</head>
+<body>
+	<div id="progress">
+		<span id="message">
+			Loading ...
+		</span>
+		<center>
+			<div id="progressbar" class="shadow">
+				<div id="bar" class="shadow">
+				</div>
+			</div>
+			<div id="start" class="disabled">
+				Start
+			</div>
+		</center>
+	</div>
+<script>
+	var SCREEN_WIDTH = window.innerWidth;
+	var SCREEN_HEIGHT = window.innerHeight;
+	var VIEW_ANGLE = 67;
+</script>
+<script src="js/three.min.js"></script>
+<script src="js/Detector.js"></script>
+<script src="js/Stats.js"></script>
+<script src="js/OrbitControls.js"></script>
+<script src="js/THREEx.KeyboardState.js"></script>
+<script src="js/THREEx.FullScreen.js"></script>
+<script src="js/THREEx.WindowResize.js"></script>
+<script src="js/THREE.CSS3DRenderer.js"></script> 
+<script src="js/ParticleEngine.js"></script>
+<script src="js/ParticleEngineExamples.js"></script>
+<script src="js/PresentEngine.js"></script>
+<script src="js/ShaderParticleGroup.js"></script>
+<script src="js/ShaderParticleEmitter.js"></script>
+<script src="fonts/optimer_regular.typeface.js"></script>
+<script src="fonts/optimer_bold.typeface.js"></script>
+
+<!-- jQuery code to display an information button and box when clicked. -->
+<script src="js/jquery-1.9.1.js"></script>
+<script src="js/jquery-ui.js"></script>
+<link rel=stylesheet href="css/jquery-ui.css" />
+<link rel=stylesheet href="css/info.css"/>
+<script src="js/info.js"></script>
+<script src="js/webaudio.js"></script>
+<div id="infoButton"></div>
+<div id="infoBox" title="Merry Christmas and Happy New Year!">
+	If you have any feedback / suggestion for improvement, 
+	<br/>
+	please email me at <a href="mailto:weiseng@xtremax.com">weiseng@xtremax.com</a>
+	<br />
+	<br />
+		Credit to
+		<br/> 
+		<a href="https://github.com/mrdoob" target="_blank">mrdoob</a> for the awesome three.js
+
+		<br/>
+		<a href="https://github.com/stemkoski" target="_blank">Lee Stemkoski </a> and 
+		<a href="https://github.com/squarefeet" target="_blank">squarefeet </a> for the ParticleSystem script	
+</div>
+
+<!-- ------------------------------------------------------------ -->
+
+<div id="ThreeJS" style="position: absolute; left:0px; top:0px"></div>
+<script>
+// MAIN
+
+// standard global variables
+var container, scene, camera, renderer, controls, stats, cssRenderer, projector, ray;
+var floor, bg, engine, engine2, engine3, skyBgEvent, ayu, ayuAnimator, rainbow, santa, ladder, birdArray, birdAnimator, moon, presentMeshes;
+var presentEngineArray;
+var loaded, total;
+// Used in initParticles()
+var emitter, particleGroup;
+var mouseX, mouseY, mouseVector = new THREE.Vector3();
+var keyboard = new THREEx.KeyboardState();
+var clock = new THREE.Clock();
+var numPresentsCollected = 0;
+// TEXTURE
+var textureBg, textureAyu, textureLadder, textureGingerBread, textureSantaHat, textureBell, textureChristmasTree;
+var textureRainbow, textureBird, textureSanta, textureMoon;
+// AUDIO
+var sound 
+
+
+init();
+initParticles();
+
+function initTexture()
+{
+	textureBg = new THREE.ImageUtils.loadTexture( 'images/bg.png' );
+	textureAyu = new THREE.ImageUtils.loadTexture( 'images/AyuSprite.png' );
+	textureLadder = new THREE.ImageUtils.loadTexture( 'images/ladder.png' );
+	textureGingerBread = new THREE.ImageUtils.loadTexture( 'images/gingerbread.png' );
+	textureSantaHat = new THREE.ImageUtils.loadTexture( 'images/santahat.png' );
+	textureBell = new THREE.ImageUtils.loadTexture( 'images/bell.png' );
+	textureChristmasTree = new THREE.ImageUtils.loadTexture( 'images/christmastree.png' );
+	textureRainbow = new THREE.ImageUtils.loadTexture( 'images/rainbow.png' );
+	textureBird = new THREE.ImageUtils.loadTexture( 'images/birdSprite.png' );
+	textureSanta = new THREE.ImageUtils.loadTexture( 'images/santa.png' );
+	textureMoon = new THREE.ImageUtils.loadTexture( 'images/moon.png' );
+}
+
+THREE.DefaultLoadingManager.onProgress = function ( item, loaded, total ) {
+	 console.log( item, loaded, total );
+
+	 if (loaded == total) {
+	 	var webaudio = new WebAudio();
+		sound = webaudio.createSound();
+		sound.load('audio/Welcome_My_Lord.mp3', function(sound){
+			
+			showStartScreen();
+		});	 	
+	 }
+};
+
+$('#start').click(function() {
+	$('#progress').hide();
+	animate();
+	sound.loop(true).play();
+});
+
+function showStartScreen() {
+	$('#message')[0].style.display = "none";
+	$('#progressbar')[0].style.display = "none";
+	$('#start')[0].style.display = "block";
+	$('#start')[0].className = "enabled";
+}
+
+// FUNCTIONS 		
+function init() {
+	// TEXTURE
+	initTexture();
+	// SCENE
+	scene = new THREE.Scene();
+	// CAMERA
+	console.log(SCREEN_WIDTH + "|" + SCREEN_HEIGHT);
+
+	var ASPECT = SCREEN_WIDTH / SCREEN_HEIGHT, NEAR = 0.1, FAR = 20000;
+	camera = new THREE.PerspectiveCamera( VIEW_ANGLE, ASPECT, NEAR, FAR);
+	
+	camera.position.set(0, 0, 500);
+	camera.up = new THREE.Vector3(0, 1, 0);
+	//camera.lookAt(0, 0, -1);
+	//camera.rotation.x = Math.PI / 2;
+	camera.lookAt(scene.position);	
+
+	//scene.add(camera);
+	// camera.lookAt(1 , 0 , 0);
+	// RENDERER
+	if ( Detector.webgl )
+		renderer = new THREE.WebGLRenderer( {antialias:true} );
+	else
+		renderer = new THREE.CanvasRenderer(); 
+	renderer.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
+
+	container = document.getElementById( 'ThreeJS' );
+	container.appendChild( renderer.domElement );
+
+	cssRenderer = new THREE.CSS3DRenderer();
+	cssRenderer.setSize( SCREEN_WIDTH, SCREEN_HEIGHT );
+	cssRenderer.domElement.style.position = 'absolute';
+	cssRenderer.domElement.style.top = 0;
+	// PROJECTOR
+	projector = new THREE.Projector();
+	// presentMeshes
+	presentMeshes = [];
+	// EVENTS
+	THREEx.WindowResize(renderer, camera);
+	THREEx.FullScreen.bindKey({ charCode : 'm'.charCodeAt(0) });
+	// CONTROLS
+	controls = new THREE.OrbitControls( camera, renderer.domElement );
+	// STATS
+	stats = new Stats();
+	stats.domElement.style.position = 'absolute';
+	stats.domElement.style.bottom = '0px';
+	stats.domElement.style.zIndex = 100;
+	container.appendChild( stats.domElement );
+	// LIGHT
+	// var light = new THREE.PointLight(0xffffff);
+	// light.position.set(0,250,0);
+	//scene.add(light);
+	// FLOOR
+	// var floorTexture = new THREE.ImageUtils.loadTexture( 'images/checkerboard.jpg' );
+	// floorTexture.wrapS = floorTexture.wrapT = THREE.RepeatWrapping; 
+	// floorTexture.repeat.set( 10, 100 );
+	// var floorMaterial = new THREE.MeshBasicMaterial( { map: floorTexture, side: THREE.DoubleSide } );
+	// var floorGeometry = new THREE.PlaneGeometry(1000, 10000, 10, 10);
+	// floor = new THREE.Mesh(floorGeometry, floorMaterial);
+	// floor.position.y = -0.5;
+	// floor.rotation.x = Math.PI / 2;
+	//scene.add(floor);
+
+	// SKYBOX/FOG
+	// var skyBoxGeometry = new THREE.CubeGeometry( 10000, 10000, 10000 );
+	// var skyBoxMaterial = new THREE.MeshBasicMaterial( { color: 0x9999ff, side: THREE.BackSide } );
+	// var skyBox = new THREE.Mesh( skyBoxGeometry, skyBoxMaterial );
+ //    skyBox.flipSided = true; // render faces from inside of the cube, instead of from outside (default).
+	// //scene.add(skyBox);
+	// scene.fog = new THREE.FogExp2( 0x9999ff, 0.00025 );
+
+	// BACKGROUND
+	var bgMaterial = new THREE.MeshBasicMaterial( { map: textureBg, side: THREE.FrontSide });
+	var bgGeometry = new THREE.PlaneGeometry(SCREEN_WIDTH, 12000);
+	bg = new THREE.Mesh(bgGeometry, bgMaterial);
+	bg.position.y = 6000;
+	scene.add(bg);
+
+	// AYU 
+	ayuAnimator = new TextureAnimator( textureAyu, 4, 1, 4, 100);
+	var ayuMaterial = new THREE.MeshBasicMaterial( { map: textureAyu, side: THREE.FrontSide, transparent: true });
+	var ayuGeometry = new THREE.PlaneGeometry(50, 50);
+	ayu = new THREE.Mesh(ayuGeometry, ayuMaterial);
+	ayu.position.set(0, 0, 151);
+	scene.add(ayu);
+
+	// LADDER
+	textureLadder.wrapS = textureLadder.wrapT = THREE.RepeatWrapping; 
+	textureLadder.repeat.set( 1, 240 );
+	var ladderMaterial = new THREE.MeshBasicMaterial( { map: textureLadder, side: THREE.FrontSide, transparent: true });
+	var ladderGeometry = new THREE.PlaneGeometry(50, 12000);
+	ladder = new THREE.Mesh(ladderGeometry, ladderMaterial);
+	ladder.position.set(0, 5880, 150);
+	scene.add(ladder);
+
+	// PARTICLE SYSTEM
+	engine = new ParticleEngine();
+	engine.setValues( Examples.m_whiteclouds );
+	engine.initialize();
+
+	engine2 = new ParticleEngine();
+	engine2.initialize();
+
+	// PRESENT ENGINE
+	presentEngineArray = [];
+
+	var presentEngineGingerbread = new PresentEngine();
+	presentEngineGingerbread.setValues( 
+		{ 
+			presentTexture 			: textureGingerBread, 
+			presentsPerSecond 		: 1, 
+			presentDeathAge 		: 3,
+			angleBase               : 0,
+			angleSpread             : 10,
+			angleVelocityBase       : 0,
+			angleVelocitySpread     : 10
+		});
+	presentEngineGingerbread.initialize();
+	presentEngineArray.push(presentEngineGingerbread);
+
+	var presentEngineSantahat = new PresentEngine();
+	presentEngineSantahat.setValues(
+		{
+			presentTexture 			: textureSantaHat,
+			presentsPerSecond 		: 1,
+			presentDeathAge 		: 3,
+			angleBase               : 0,
+			angleSpread             : 10,
+			angleVelocityBase       : 0,
+			angleVelocitySpread     : 10
+		});
+	presentEngineSantahat.initialize();
+	presentEngineArray.push(presentEngineSantahat);
+
+	var presentEngineBell = new PresentEngine();
+	presentEngineBell.setValues(
+		{
+			presentTexture 			: textureBell,
+			presentsPerSecond 		: 1,
+			presentDeathAge 		: 3,
+			angleBase               : 0,
+			angleSpread             : 10,
+			angleVelocityBase       : 0,
+			angleVelocitySpread     : 10
+		});
+	presentEngineBell.initialize();
+	presentEngineArray.push(presentEngineBell);
+
+	var presentEngineTree = new PresentEngine();
+	presentEngineTree.setValues(
+		{
+			presentTexture 			: textureChristmasTree,
+			presentsPerSecond 		: 1,
+			presentDeathAge 		: 3,
+			angleBase               : 0,
+			angleSpread             : 10,
+			angleVelocityBase       : 0,
+			angleVelocitySpread     : 10
+		});
+	presentEngineTree.initialize();
+	presentEngineArray.push(presentEngineTree);
+
+	document.addEventListener("keydown", onDocumentKeyDown, false);
+	document.addEventListener("mousedown", onDocumentMouseDown, false);   
+	document.addEventListener("mousemove", onDocumentMouseDown, false); 
+
+	window.addEventListener( 'resize', function() {
+	    var w = window.innerWidth,
+	        h = window.innerHeight;
+	    renderer.setSize( w, h );
+	    camera.aspect = w / h;
+	    camera.updateProjectionMatrix();
+	}, false );
+
+	skyBgEvent = 
+	{ 
+		"5500": false, 
+		"3900": false, 
+		"3300": false, 
+		"2300": false,
+		"1000": false, 
+		"0"	   : false,
+		"-1000": false, 
+		"-1500": false, 
+		"-3000": false,
+		"-3500": false,
+		"-5899": false,
+		"-5900": false
+	};
+}
+// Create particle group and emitter
+function initParticles() {
+	particleGroup = new ShaderParticleGroup({
+		texture: THREE.ImageUtils.loadTexture('images/smokeparticle.png'),
+		maxAge: 3
+	});
+
+	emitter = new ShaderParticleEmitter({
+		position: new THREE.Vector3(0, 0, 0),
+        // positionSpread: new THREE.Vector3(2, 2, 2),
+
+        acceleration: new THREE.Vector3(0, -5, 0),
+        accelerationSpread: new THREE.Vector3(5, 0, 5),
+
+        velocity: new THREE.Vector3(0, 10, 0),
+
+		colorStart: (new THREE.Color()).setRGB(0.5, 0.5, 0.5),
+        colorSpread: new THREE.Vector3(1, 1, 1),
+		colorEnd: new THREE.Color('white'),
+		size: 20,
+		sizeEnd: 0,
+
+		particlesPerSecond: 500
+	});
+
+	particleGroup.addEmitter( emitter );
+	scene.add( particleGroup.mesh );
+}
+function animate() {
+    requestAnimationFrame( animate );
+	render();		
+	update();
+}
+
+function update() {
+	var dt = clock.getDelta();
+
+	if (engine) engine.update( dt * 0.5 );
+	if (engine2) engine2.update( dt * 0.5 );
+	if (engine3) engine3.update(dt * 0.5);
+
+	var presentEngineArrayLength = presentEngineArray.length;
+	for (var i = 0; i < presentEngineArrayLength; i++) {
+		if (presentEngineArray[i]) {
+			presentEngineArray[i].update(dt * 0.5);
+		}
+	}
+
+	if (!skyBgEvent["-5899"] && bg.position.y < -5899) {
+		skyBgEvent["-5899"] = true;
+		engine3 = new ParticleEngine();
+		engine3.setValues( Examples.m_starfountain );
+		engine3.initialize();
+	}
+	else if (!skyBgEvent["-3500"] && bg.position.y < -4500) {
+		skyBgEvent["-3500"] = true;
+		initEventMoon();
+	}
+	else if (!skyBgEvent["-3000"] && bg.position.y < -3000) {
+		skyBgEvent["-3000"] = true;
+		engine2.emitterAlive = false;
+		restartEngine( Examples.m_starfield);
+	}
+	else if (!skyBgEvent["-1500"] && bg.position.y < -1500) {
+	 	skyBgEvent["-1500"] = true;
+	 	engine.emitterAlive = false;
+
+	}
+	else if (!skyBgEvent["-1000"] && bg.position.y < -1000) {
+		skyBgEvent["-1000"] = true;
+		restartEngine2( Examples.m_starfieldblink );
+	}
+	else if (!skyBgEvent["0"] && bg.position.y < 0) {
+		skyBgEvent["0"] = true;
+		engine2.emitterAlive = false;
+	}
+	else if (!skyBgEvent["1000"] && bg.position.y < 1000) {
+	 	skyBgEvent["1000"] = true;
+	 	restartEngine( Examples.m_fallingstar );
+	}
+	else if (!skyBgEvent["2300"] && bg.position.y < 2300 ) {
+		skyBgEvent["2300"] = true;
+		initEventSanta();
+	}
+	else if (!skyBgEvent["3300"] && bg.position.y < 3300 ) {
+		skyBgEvent["3300"] = true;
+		engine.emitterAlive = false;
+		restartEngine2( Examples.m_snow );
+	}	
+	else if (!skyBgEvent["3900"] && bg.position.y < 3900) {
+		skyBgEvent["3900"] = true;
+		initEventBird();
+	}
+	else if (!skyBgEvent["5500"] && bg.position.y < 5500) {
+		skyBgEvent["5500"] = true; 
+		initEventRainbow();
+	}
+	if (keyboard.pressed("a")) {
+		console.log("sky.position.y: " + bg.position.y);
+	}
+	if (bg.position.y > -5900) 
+	{
+		bg.position.y -= 2;;
+		ladder.position.y -= 2;
+		ayuAnimator.update(1000 * dt);
+		updateRainbow();
+		updateBirdArray(dt);
+		updateSanta();
+		updateMoon();
+		for (var i = 0; i < presentEngineArrayLength; i++) {
+			var presentEngine = presentEngineArray[i];
+			if (presentEngine && presentEngine.presentAnimator) {
+				presentEngine.presentAnimator.update(1000 * dt);
+			}
+		}
+	}
+	else
+	{
+		for (var i = 0; i < presentEngineArrayLength; i++) {
+			var presentEngine = presentEngineArray[i];
+			if (presentEngine) {
+				presentEngine.destroy();
+			}
+		}
+		if (!skyBgEvent["-5900"])
+		{
+			skyBgEvent["-5900"] = true;
+			showResult();
+		}
+	}
+	if (keyboard.pressed("down")) {
+		bg.position.y += 2;
+		ladder.position.y += 2;
+	}
+	if (keyboard.pressed("left")) {
+		bg.position.x--;
+	}
+	if (keyboard.pressed("right")) {
+		bg.position.x++;
+	}
+	if (keyboard.pressed("q")) {
+		bg.position.y = -4500;
+		ladder.position.y = -4500;
+	}
+	if (keyboard.pressed("r")) {
+		camera.position.set(0, 0, 500);
+		camera.up = new THREE.Vector3(0, 1, 0);
+		camera.lookAt(0, 0, -1);
+	}
+	controls.update();
+	stats.update();	
+}
+
+function render() {
+	particleGroup.tick( 0.016 );
+	renderer.render( scene, camera );
+}
+
+function onDocumentMouseMove(event) {
+	// console.log(event.clientX + ", " + event.clientY);
+
+	// mouseVector.set(
+ //        (event.clientX / window.innerWidth) * 2 - 1,
+ //        -(event.clientY / window.innerHeight) * 2 + 1,
+ //        0.5
+ //    );
+
+ //    projector.unprojectVector( mouseVector, camera );
+
+ //    emitter.position.x = mouseVector.x * camera.fov;
+ //    emitter.position.y = mouseVector.y * camera.fov;    
+
+ //    console.log("event.clientX: " + event.clientX);
+ //    console.log("window.innerWidth: " + window.innerWidth);
+
+ //    console.log("emitter.position.x: " + emitter.position.x);
+ //    console.log("mouseVector.x: " + mouseVector.x);
+ //    console.log("camera.fov: " + camera.fov);
+}	
+
+function onDocumentKeyDown(event){
+    var keyCode = event.which;
+}
+function onDocumentMouseDown( event ) {
+
+    event.preventDefault();
+
+    var vector = new THREE.Vector3( ( event.clientX / window.innerWidth ) * 2 - 1, - ( event.clientY / window.innerHeight ) * 2 + 1, 1 );
+    projector.unprojectVector( vector, camera );
+    var raycaster = new THREE.Raycaster( camera.position, vector.sub( camera.position ).normalize() );
+	var intersects = raycaster.intersectObjects( presentMeshes );
+	
+    if ( intersects.length > 0 ) {
+    	
+    	intersects[0].object.present.destroy();
+    	numPresentsCollected++;
+    	console.log(numPresentsCollected);
+    }
+}
+
+function restartEngine(parameters)
+{
+	engine.destroy();
+	engine = new ParticleEngine();
+	engine.setValues( parameters );
+	engine.initialize();
+}
+function restartEngine2(parameters)
+{
+	engine2.destroy();
+	engine2 = new ParticleEngine();
+	engine2.setValues( parameters );
+	engine2.initialize();
+}
+function initEventBird() {
+
+	birdAnimator = new TextureAnimator( textureBird, 2, 1, 2, 140);
+	var birdMaterial = new THREE.MeshBasicMaterial( { map: textureBird, side: THREE.DoubleSide, transparent: true });
+	var birdGeometry = new THREE.PlaneGeometry(50, 50);
+	var bird1 = new THREE.Mesh(birdGeometry, birdMaterial);
+	var bird2 = new THREE.Mesh(birdGeometry, birdMaterial);
+	var bird3 = new THREE.Mesh(birdGeometry, birdMaterial);
+	var bird4 = new THREE.Mesh(birdGeometry, birdMaterial);
+	var bird5 = new THREE.Mesh(birdGeometry, birdMaterial);
+	var bird6 = new THREE.Mesh(birdGeometry, birdMaterial);
+	var bird7 = new THREE.Mesh(birdGeometry, birdMaterial);
+	var bird8 = new THREE.Mesh(birdGeometry, birdMaterial);
+	var bird9 = new THREE.Mesh(birdGeometry, birdMaterial);
+	var bird10 = new THREE.Mesh(birdGeometry, birdMaterial);
+	var bird11 = new THREE.Mesh(birdGeometry, birdMaterial);
+	var bird12 = new THREE.Mesh(birdGeometry, birdMaterial);
+	var bird13 = new THREE.Mesh(birdGeometry, birdMaterial);
+	
+	bird1.position.set(-150, 30, 149);
+	bird2.position.set(-195, -30, 149);
+	bird3.position.set(-255, -75, 149);
+	bird4.position.set(-330, -90, 149);
+	bird5.position.set(-405, -75, 149);
+	bird6.position.set(-465, -30, 149);
+	bird7.position.set(-510, 30, 149);
+	bird8.position.set(-270, 140, 149);
+	bird9.position.set(-390, 140, 149);
+	bird10.position.set(-270, 110, 149);
+	bird11.position.set(-390, 110, 149);
+	bird12.position.set(-270, 60, 149);
+	bird13.position.set(-390, 60, 149);
+
+	birdArray = [];
+	birdArray.push(bird1);
+	birdArray.push(bird2);
+	birdArray.push(bird3);
+	birdArray.push(bird4);
+	birdArray.push(bird5);
+	birdArray.push(bird6);
+	birdArray.push(bird7);
+	birdArray.push(bird8);
+	birdArray.push(bird9);
+	birdArray.push(bird10);
+	birdArray.push(bird11);
+	birdArray.push(bird12);
+	birdArray.push(bird13);
+
+	var birdArray_length = birdArray.length;
+	for (var i = 0; i < birdArray_length; i++) {
+		scene.add(birdArray[i]);
+	}
+}
+function initEventRainbow() {;
+	var rainbowMaterial = new THREE.MeshBasicMaterial( { map: textureRainbow, side: THREE.FrontSide, transparent: true });
+	var rainbowGeometry = new THREE.PlaneGeometry(SCREEN_WIDTH, SCREEN_WIDTH / 191 * 88);
+	rainbow = new THREE.Mesh(rainbowGeometry, rainbowMaterial);
+	rainbow.position.set(0, SCREEN_HEIGHT, 1);
+	scene.add(rainbow);
+}
+function initEventSanta() {
+	var santaMaterial = new THREE.MeshBasicMaterial( { map: textureSanta, slide: THREE.FrontSide, transparent: true });
+	var santaGeometry = new THREE.PlaneGeometry(300, 200);	
+	santa = new THREE.Mesh(santaGeometry, santaMaterial);
+	santa.position.set(SCREEN_WIDTH / 2, SCREEN_HEIGHT / -4, 100);
+	scene.add(santa);
+}
+function initEventMoon() {
+	var moonMaterial = new THREE.MeshBasicMaterial( { map: textureMoon, slide: THREE.FrontSide, transparent: true });
+	var moonGeometry = new THREE.PlaneGeometry(170, 170);
+	moon = new THREE.Mesh(moonGeometry, moonMaterial);
+	moon.position.set(0, SCREEN_HEIGHT / 4, 0);
+	scene.add(moon);
+}
+function updateRainbow() {
+	if (rainbow) {
+		if (rainbow.position.y > -SCREEN_HEIGHT) {
+			rainbow.position.y -= 1.2;
+		}
+		else {
+			scene.remove(rainbow);
+			rainbow = null;
+		}
+	}
+}
+function updateBirdArray(dt) {
+	if (birdArray) {
+		var birdArray_length = birdArray.length;
+		if (bg.position.y > 3000) {
+			for (var i = 0; i < birdArray_length; i++) {
+				birdArray[i].position.x += 2;
+			}
+			birdAnimator.update(1000 *dt);
+		}
+		else {
+			for (var i = 0; i < birdArray_length; i++) {
+				scene.remove(birdArray[i]);
+			}
+			birdArray = null;
+		}
+	} 		
+}
+function updateSanta() {
+	if (santa) {
+		if (santa.position.x > - SCREEN_WIDTH / 2 - 200) {
+			santa.position.x -= 2;
+			santa.position.y += 0.4;
+		}
+		else {
+			scene.remove(santa);
+			santa = null;
+		}
+	}
+}
+function updateMoon() {
+	if (moon) {
+		if (moon.position.z < 149) {
+			moon.position.y -= 0.15;
+			moon.position.z += 0.21;
+		}
+	}
+}
+function showResult() {
+
+	var textGeo1 = new THREE.TextGeometry( "Congratulations!" , {
+				size: 20,
+				height: 20,
+				curveSegments: 5,
+
+				font: "optimer",
+				weight: "bold",
+				style: "normal",
+
+				material: 0, 
+				extrudeMaterial: 1
+			});
+	textGeo1.computeBoundingBox();
+
+	var textGeo2 = new THREE.TextGeometry( "You have collected " + numPresentsCollected + " presents", {
+				size: 18,
+				height: 18,
+				curveSegments: 5,
+
+				font: "optimer",
+				weight: "bold",
+				style: "normal",
+
+				material: 0, 
+				extrudeMaterial: 1
+			});
+	textGeo2.computeBoundingBox();
+
+	var material = new THREE.MeshBasicMaterial({color: 0xffffff});
+	var materialFront = new THREE.MeshBasicMaterial( { color: 0xffffff } );
+	var materialSide = new THREE.MeshBasicMaterial( { color: 0x000000 } );
+	var materialArray = [ materialFront, materialSide ];
+	var textMaterial = new THREE.MeshFaceMaterial(materialArray);
+
+	var centerOffset1 = -0.5 * ( textGeo1.boundingBox.max.x - textGeo1.boundingBox.min.x );
+	var textMesh1 = new THREE.Mesh( textGeo1, textMaterial );
+
+	textMesh1.position.x = centerOffset1;
+	textMesh1.position.y = SCREEN_HEIGHT / 2 / 500 * 200 ;
+	textMesh1.position.z = 200;
+
+	textMesh1.rotation.x = 0;
+	textMesh1.rotation.y = Math.PI * 2;
+	scene.add( textMesh1 );
+
+	var centerOffset2 = -0.5 * ( textGeo2.boundingBox.max.x - textGeo2.boundingBox.min.x );
+	var textMesh2 = new THREE.Mesh( textGeo2, textMaterial );
+
+	textMesh2.position.x = centerOffset2;
+	textMesh2.position.y = SCREEN_HEIGHT / 2 / 500 * 200 / 3 ;
+	textMesh2.position.z = 200;
+
+	textMesh2.rotation.x = 0;
+	textMesh2.rotation.y = Math.PI * 2;
+	scene.add( textMesh2 );
+}
+function TextureAnimator(texture, tilesHoriz, tilesVert, numTiles, tileDispDuration) 
+{	
+	// note: texture passed by reference, will be updated by the update function.
+		
+	this.tilesHorizontal = tilesHoriz;
+	this.tilesVertical = tilesVert;
+	// how many images does this spritesheet contain?
+	//  usually equals tilesHoriz * tilesVert, but not necessarily,
+	//  if there at blank tiles at the bottom of the spritesheet. 
+	this.numberOfTiles = numTiles;
+	texture.wrapS = texture.wrapT = THREE.RepeatWrapping; 
+	texture.repeat.set( 1 / this.tilesHorizontal, 1 / this.tilesVertical );
+
+	// how long should each image be displayed?
+	this.tileDisplayDuration = tileDispDuration;
+
+	// how long has the current image been displayed?
+	this.currentDisplayTime = 0;
+
+	// which image is currently being displayed?
+	this.currentTile = 0;
+		
+	this.update = function( milliSec )
+	{
+		this.currentDisplayTime += milliSec;
+		while (this.currentDisplayTime > this.tileDisplayDuration)
+		{
+			this.currentDisplayTime -= this.tileDisplayDuration;
+			this.currentTile++;
+			if (this.currentTile == this.numberOfTiles)
+				this.currentTile = 0;
+			var currentColumn = this.currentTile % this.tilesHorizontal;
+			texture.offset.x = currentColumn / this.tilesHorizontal;
+			var currentRow = Math.floor( this.currentTile / this.tilesHorizontal );
+			texture.offset.y = currentRow / this.tilesVertical;
+		}
+	};
+}
+
+
+
+</script>
+
+</body>
+</html>
