@@ -2,120 +2,18 @@
 <!doctype html>
 <html lang="en">
 <head>
-	<title>Star Collector (Three.js)</title>
+	<title>Xmas Fun (Three.js)</title>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 	<link rel=stylesheet href="css/base.css"/>
-	<style> 
-			html {
-				height: 100%;
-			}
-			body {
-				background:yellow;
-				color:#fff;
-				padding:0;
-				margin:0;
-				overflow:hidden;
-				font-family:georgia;
-				text-align:center;
-				height: 100%;	
-			}
-
-			canvas {
-				cursor: url(images/santa-sack.png) 31 39, auto;
-			}
-
-			#info {
-				position: absolute;
-				top: 0px; width: 100%;
-				padding: 5px;
-				font-family: Monospace;
-				font-size: 13px;
-				text-align: center;
-				z-index:100;
-			}
-
-			#progress {
-				color:red;
-				width: 100%;
-				font-size:3em;
-				font-variant:small-caps;
-				font-weight:bold;
-				position:relative;
-				z-index:2;
-				text-align: center;
-				text-shadow: #000 0px 0px 10px;
-				/*display:none;*/
-			}
-
-			#start {
-				color:#fff;
-				text-shadow: #000 0px 0px 2px;
-				padding:0.1em 0.3em;
-				width:3em;
-				text-align: center;
-				display:none;
-			}
-
-			.shadow {
-				-moz-box-shadow: 0px 0px 5px #000;
-				-webkit-box-shadow: 0px 0px 5px #000;
-				box-shadow: 0px 0px 5px #000;
-			}
-
-			#progressbar {
-				text-align: center;
-				background: white;
-				width: 250px;
-				height: 10px;
-				display: none;
-			}
-
-			#bar {
-				background:#d00;
-				width:50px;
-				height:10px;
-			}
-
-			.enabled {
-				color: lime!important;
-				cursor:pointer;
-			}
-
-			.enabled:hover {
-				text-shadow: #0f0 0px 0px 5px !important;
-			}
-
-			.disabled {
-				background:gray;
-				cursor:default;
-			}
-
-			a { color:red }
-			/*canvas { pointer-events:none; z-index:10; }*/
-			#preview {
-				display: table;
-				width: 100%;
-				height: 100%;
-			}
-			#preview > div {
-				display: table-cell;
-				text-align: center;
-				vertical-align: middle;
-			}
-		</style>
 </head>
 <body>
-	<div id="preview">
+	<div id="content">
 		<div id="progress">
 			<span id="message">
 				Loading...
 			</span>
 			<center>
-				<div id="progressbar" class="shadow">
-					<div id="bar" class="shadow">
-					</div>
-				</div>
 				<div id="start" class="disabled">
 					Start
 				</div>
@@ -147,9 +45,9 @@
 <!-- jQuery code to display an information button and box when clicked. -->
 <script src="js/jquery-1.9.1.js"></script>
 <script src="js/jquery-ui.js"></script>
+<script src="js/info.js"></script>
 <link rel=stylesheet href="css/jquery-ui.css" />
 <link rel=stylesheet href="css/info.css"/>
-<script src="js/info.js"></script>
 
 <div id="infoButton"></div>
 <div id="infoBox" title="Merry Christmas and Happy New Year!">
@@ -190,24 +88,9 @@ var textureBg, textureAyu, textureLadder, textureGingerBread, textureSantaHat, t
 var textureRainbow, textureBird, textureSanta, textureMoon;
 // AUDIO
 var sound;
+var allowMouseControls = false;
 
 init();
-initParticles();
-
-function initTexture()
-{
-	textureBg = new THREE.ImageUtils.loadTexture( 'images/bg.png' );
-	textureAyu = new THREE.ImageUtils.loadTexture( 'images/AyuSprite.png' );
-	textureLadder = new THREE.ImageUtils.loadTexture( 'images/ladder.png' );
-	textureGingerBread = new THREE.ImageUtils.loadTexture( 'images/gingerbread.png' );
-	textureSantaHat = new THREE.ImageUtils.loadTexture( 'images/santahat.png' );
-	textureBell = new THREE.ImageUtils.loadTexture( 'images/bell.png' );
-	textureChristmasTree = new THREE.ImageUtils.loadTexture( 'images/christmastree.png' );
-	textureRainbow = new THREE.ImageUtils.loadTexture( 'images/rainbow.png' );
-	textureBird = new THREE.ImageUtils.loadTexture( 'images/birdSprite.png' );
-	textureSanta = new THREE.ImageUtils.loadTexture( 'images/santa.png' );
-	textureMoon = new THREE.ImageUtils.loadTexture( 'images/moon.png' );
-}
 
 THREE.DefaultLoadingManager.onProgress = function ( item, loaded, total ) {
 	 if (loaded == total) {
@@ -221,24 +104,35 @@ THREE.DefaultLoadingManager.onProgress = function ( item, loaded, total ) {
 
 $('#start').click(function() {
 	$('#progress').hide();
-	initListener();
-
+	document.addEventListener("mousemove", onDocumentMouseMove, false);
 	animate();
 	sound.loop(true).play();
 });
 
+function onDocumentMouseMove(event) {
+    event.preventDefault();
+    emitter.position.x = (event.clientX - SCREEN_WIDTH / 2);
+    emitter.position.y = - (event.clientY - SCREEN_HEIGHT / 2);
+    emitter.position.z = 0;
+
+    mouseVector = new THREE.Vector3( ( event.clientX / window.innerWidth ) * 2 - 1, - ( event.clientY / window.innerHeight ) * 2 + 1, 1 );
+    projector.unprojectVector( mouseVector, camera );
+    var raycaster = new THREE.Raycaster( camera.position, mouseVector.sub( camera.position ).normalize() );
+	var intersects = raycaster.intersectObjects( presentMeshes );
+	
+    if ( intersects.length > 0 ) {
+    	
+    	intersects[0].object.present.destroy();
+    	numPresentsCollected++;
+    }
+} 
+
 function showStartScreen() {
 	$('#message')[0].style.display = "none";
-	$('#progressbar')[0].style.display = "none";
 	$('#start')[0].style.display = "block";
 	$('#start')[0].className = "enabled";
 }
 
-function initListener() {
-	document.addEventListener("keydown", onDocumentKeyDown, false);
-	document.addEventListener("mousedown", onDocumentMouseDown, false);   
-	document.addEventListener("mousemove", onDocumentMouseMove, false); 
-}
 // FUNCTIONS 		
 function init() {
 	// TEXTURE
@@ -246,19 +140,12 @@ function init() {
 	// SCENE
 	scene = new THREE.Scene();
 	// CAMERA
-	console.log(SCREEN_WIDTH + "|" + SCREEN_HEIGHT);
-
 	var ASPECT = SCREEN_WIDTH / SCREEN_HEIGHT, NEAR = 0.1, FAR = 20000;
 	camera = new THREE.PerspectiveCamera( VIEW_ANGLE, ASPECT, NEAR, FAR);
-	
 	camera.position.set(0, 0, 500);
 	camera.up = new THREE.Vector3(0, 1, 0);
-	//camera.lookAt(0, 0, -1);
-	//camera.rotation.x = Math.PI / 2;
 	camera.lookAt(scene.position);	
 
-	//scene.add(camera);
-	// camera.lookAt(1 , 0 , 0);
 	// RENDERER
 	if ( Detector.webgl )
 		renderer = new THREE.WebGLRenderer( {antialias:true} );
@@ -275,7 +162,7 @@ function init() {
 	cssRenderer.domElement.style.top = 0;
 	// PROJECTOR
 	projector = new THREE.Projector();
-	// presentMeshes
+	// PRESENT MESHES
 	presentMeshes = [];
 	// EVENTS
 	THREEx.WindowResize(renderer, camera);
@@ -307,8 +194,8 @@ function init() {
 	// var skyBoxGeometry = new THREE.CubeGeometry( 10000, 10000, 10000 );
 	// var skyBoxMaterial = new THREE.MeshBasicMaterial( { color: 0x9999ff, side: THREE.BackSide } );
 	// var skyBox = new THREE.Mesh( skyBoxGeometry, skyBoxMaterial );
- //    skyBox.flipSided = true; // render faces from inside of the cube, instead of from outside (default).
-	// //scene.add(skyBox);
+ 	// skyBox.flipSided = true; // render faces from inside of the cube, instead of from outside (default).
+	// scene.add(skyBox);
 	// scene.fog = new THREE.FogExp2( 0x9999ff, 0.00025 );
 
 	// BACKGROUND
@@ -402,8 +289,6 @@ function init() {
 	presentEngineTree.initialize();
 	presentEngineArray.push(presentEngineTree);
 
-
-
 	skyBgEvent = 
 	{ 
 		"5500": false, 
@@ -419,8 +304,22 @@ function init() {
 		"-5899": false,
 		"-5900": false
 	};
+
+	initParticles();
 }
-// Create particle group and emitter
+function initTexture() {
+	textureBg = new THREE.ImageUtils.loadTexture( 'images/bg.png' );
+	textureAyu = new THREE.ImageUtils.loadTexture( 'images/AyuSprite.png' );
+	textureLadder = new THREE.ImageUtils.loadTexture( 'images/ladder.png' );
+	textureGingerBread = new THREE.ImageUtils.loadTexture( 'images/gingerbread.png' );
+	textureSantaHat = new THREE.ImageUtils.loadTexture( 'images/santahat.png' );
+	textureBell = new THREE.ImageUtils.loadTexture( 'images/bell.png' );
+	textureChristmasTree = new THREE.ImageUtils.loadTexture( 'images/christmastree.png' );
+	textureRainbow = new THREE.ImageUtils.loadTexture( 'images/rainbow.png' );
+	textureBird = new THREE.ImageUtils.loadTexture( 'images/birdSprite.png' );
+	textureSanta = new THREE.ImageUtils.loadTexture( 'images/santa.png' );
+	textureMoon = new THREE.ImageUtils.loadTexture( 'images/moon.png' );
+}
 function initParticles() {
 	particleGroup = new ShaderParticleGroup({
 		texture: THREE.ImageUtils.loadTexture('images/smokeparticle.png'),
@@ -453,7 +352,6 @@ function animate() {
 	render();		
 	update();
 }
-
 function update() {
 	var dt = clock.getDelta();
 
@@ -516,9 +414,6 @@ function update() {
 		skyBgEvent["5500"] = true; 
 		initEventRainbow();
 	}
-	if (keyboard.pressed("a")) {
-		console.log("sky.position.y: " + bg.position.y);
-	}
 	if (bg.position.y > -5900) 
 	{
 		bg.position.y -= 2;;
@@ -549,90 +444,31 @@ function update() {
 			showResult();
 		}
 	}
-	if (keyboard.pressed("down")) {
-		bg.position.y += 2;
-		ladder.position.y += 2;
-	}
-	if (keyboard.pressed("left")) {
-		bg.position.x--;
-	}
-	if (keyboard.pressed("right")) {
-		bg.position.x++;
-	}
-	if (keyboard.pressed("q")) {
-		bg.position.y = -4500;
-		ladder.position.y = -4500;
+	if (keyboard.pressed("c")) {
+		allowMouseControls = !allowMouseControls;
 	}
 	if (keyboard.pressed("r")) {
 		camera.position.set(0, 0, 500);
 		camera.up = new THREE.Vector3(0, 1, 0);
 		camera.lookAt(0, 0, -1);
 	}
-	controls.update();
+
+	if (allowMouseControls) {
+		controls.update(); 
+	}
 	stats.update();	
 }
-
 function render() {
 	particleGroup.tick( 0.016 );
 	renderer.render( scene, camera );
 }
-
-function onDocumentMouseMove(event) {
-    event.preventDefault();
-    emitter.position.x = (event.clientX - SCREEN_WIDTH / 2);
-    emitter.position.y = - (event.clientY - SCREEN_HEIGHT / 2);
-    emitter.position.z = 0;
-
-    mouseVector = new THREE.Vector3( ( event.clientX / window.innerWidth ) * 2 - 1, - ( event.clientY / window.innerHeight ) * 2 + 1, 1 );
-    projector.unprojectVector( mouseVector, camera );
-    var raycaster = new THREE.Raycaster( camera.position, mouseVector.sub( camera.position ).normalize() );
-	var intersects = raycaster.intersectObjects( presentMeshes );
-	
-    if ( intersects.length > 0 ) {
-    	
-    	intersects[0].object.present.destroy();
-    	numPresentsCollected++;
-    	console.log(numPresentsCollected);
-    }
-     
-    
-
-	// mouseVector.set(
- //        (event.clientX / window.innerWidth) * 2 - 1,
- //        -(event.clientY / window.innerHeight) * 2 + 1,
- //        0.5
- //    );
-
- //    projector.unprojectVector( mouseVector, camera );
-
- //    emitter.position.x = mouseVector.x * camera.fov;
- //    emitter.position.y = mouseVector.y * camera.fov;    
-
- //    console.log("event.clientX: " + event.clientX);
- //    console.log("window.innerWidth: " + window.innerWidth);
-
- //    console.log("emitter.position.x: " + emitter.position.x);
- //    console.log("mouseVector.x: " + mouseVector.x);
- //    console.log("camera.fov: " + camera.fov);
-}	
-
-function onDocumentKeyDown(event) {
-    var keyCode = event.which;
-}
-function onDocumentMouseDown( event ) {
-
-
-}
-
-function restartEngine(parameters)
-{
+function restartEngine(parameters) {
 	engine.destroy();
 	engine = new ParticleEngine();
 	engine.setValues( parameters );
 	engine.initialize();
 }
-function restartEngine2(parameters)
-{
+function restartEngine2(parameters) {
 	engine2.destroy();
 	engine2 = new ParticleEngine();
 	engine2.setValues( parameters );
@@ -818,8 +654,7 @@ function showResult() {
 	textMesh2.rotation.y = Math.PI * 2;
 	scene.add( textMesh2 );
 }
-function TextureAnimator(texture, tilesHoriz, tilesVert, numTiles, tileDispDuration) 
-{	
+function TextureAnimator(texture, tilesHoriz, tilesVert, numTiles, tileDispDuration) {	
 	// note: texture passed by reference, will be updated by the update function.
 		
 	this.tilesHorizontal = tilesHoriz;
@@ -856,8 +691,6 @@ function TextureAnimator(texture, tilesHoriz, tilesVert, numTiles, tileDispDurat
 		}
 	};
 }
-
-
 
 </script>
 

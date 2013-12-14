@@ -7,3 +7,78 @@
 	overflow: hidden;
 }*/
 
+html {
+	height: 100%;
+}
+body {
+	background:black;
+	color:#fff;
+	padding:0;
+	margin:0;
+	overflow:hidden;
+	font-family:georgia;
+	text-align:center;
+	height: 100%;	
+}
+
+canvas {
+	cursor: url(../images/santasack.png) 31 39, auto;
+}
+
+#info {
+	position: absolute;
+	top: 0px; width: 100%;
+	padding: 5px;
+	font-family: Monospace;
+	font-size: 13px;
+	text-align: center;
+	z-index:100;
+}
+
+#progress {
+	color:red;
+	width: 100%;
+	font-size:3em;
+	font-variant:small-caps;
+	font-weight:bold;
+	position:relative;
+	z-index:2;
+	text-align: center;
+	text-shadow: #000 0px 0px 10px;
+}
+
+#start {
+	color:#fff;
+	text-shadow: #000 0px 0px 2px;
+	padding:0.1em 0.3em;
+	width:3em;
+	text-align: center;
+	display:none;
+}
+
+.enabled {
+	color: lime!important;
+	cursor:pointer;
+}
+
+.enabled:hover {
+	text-shadow: #0f0 0px 0px 5px !important;
+}
+
+.disabled {
+	background:gray;
+	cursor:default;
+}
+
+a { color:red }
+
+#content {
+	display: table;
+	width: 100%;
+	height: 100%;
+}
+#content > div {
+	display: table-cell;
+	text-align: center;
+	vertical-align: middle;
+}
