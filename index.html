@@ -6,7 +6,10 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 	<link rel=stylesheet href="css/base.css"/>
-	<style>
+	<style> 
+			html {
+				height: 100%;
+			}
 			body {
 				background:yellow;
 				color:#fff;
@@ -15,8 +18,11 @@
 				overflow:hidden;
 				font-family:georgia;
 				text-align:center;
-				height: auto;
-				cursor: url(/images/santa-sack.png), pointer;
+				height: 100%;	
+			}
+
+			canvas {
+				cursor: url(images/santa-sack.png) 31 39, auto;
 			}
 
 			#info {
@@ -31,13 +37,12 @@
 
 			#progress {
 				color:red;
-				top:7em;
 				width: 100%;
 				font-size:3em;
 				font-variant:small-caps;
 				font-weight:bold;
-				position:absolute;
-				z-index:100;
+				position:relative;
+				z-index:2;
 				text-align: center;
 				text-shadow: #000 0px 0px 10px;
 				/*display:none;*/
@@ -63,6 +68,7 @@
 				background: white;
 				width: 250px;
 				height: 10px;
+				display: none;
 			}
 
 			#bar {
@@ -86,65 +92,35 @@
 			}
 
 			a { color:red }
-			canvas { pointer-events:none; z-index:10; }
-
-			#scene_explorer {
-				background:transparent;
-				color:#fff;
-				width:200px;
-				position:absolute;
-				text-align:left;
-				top:0px;
-				z-index:200;
-				overflow:auto;
+			/*canvas { pointer-events:none; z-index:10; }*/
+			#preview {
+				display: table;
+				width: 100%;
+				height: 100%;
 			}
-
-			#section_exp {
-				background:rgba(0,0,50,0.5);
-				padding:0.5em 0;
-				display:none;
+			#preview > div {
+				display: table-cell;
+				text-align: center;
+				vertical-align: middle;
 			}
-
-			#scene_explorer h3 {
-				font-size:1em;
-				padding:0;
-				margin:0;
-				color:orange;
-			}
-
-			#scene_explorer a {
-				color:#555;
-				font-weight:bold;
-				text-decoration:none;
-				font-size:1.2em;
-				font-family:Monospace;
-			}
-			#scene_explorer a:hover {
-				background:#555;
-				color:rgba(0,0,50,1);
-			}
-
-			.part {
-				display:none;
-				padding:0 0 0.5em 2em;
-			}
-
 		</style>
 </head>
 <body>
-	<div id="progress">
-		<span id="message">
-			Loading ...
-		</span>
-		<center>
-			<div id="progressbar" class="shadow">
-				<div id="bar" class="shadow">
+	<div id="preview">
+		<div id="progress">
+			<span id="message">
+				Loading...
+			</span>
+			<center>
+				<div id="progressbar" class="shadow">
+					<div id="bar" class="shadow">
+					</div>
 				</div>
-			</div>
-			<div id="start" class="disabled">
-				Start
-			</div>
-		</center>
+				<div id="start" class="disabled">
+					Start
+				</div>
+			</center>
+		</div>
 	</div>
 <script>
 	var SCREEN_WIDTH = window.innerWidth;
@@ -159,6 +135,7 @@
 <script src="js/THREEx.FullScreen.js"></script>
 <script src="js/THREEx.WindowResize.js"></script>
 <script src="js/THREE.CSS3DRenderer.js"></script> 
+<script src="js/webaudio.js"></script>
 <script src="js/ParticleEngine.js"></script>
 <script src="js/ParticleEngineExamples.js"></script>
 <script src="js/PresentEngine.js"></script>
@@ -173,7 +150,7 @@
 <link rel=stylesheet href="css/jquery-ui.css" />
 <link rel=stylesheet href="css/info.css"/>
 <script src="js/info.js"></script>
-<script src="js/webaudio.js"></script>
+
 <div id="infoButton"></div>
 <div id="infoBox" title="Merry Christmas and Happy New Year!">
 	If you have any feedback / suggestion for improvement, 
@@ -198,6 +175,7 @@
 
 // standard global variables
 var container, scene, camera, renderer, controls, stats, cssRenderer, projector, ray;
+// objects
 var floor, bg, engine, engine2, engine3, skyBgEvent, ayu, ayuAnimator, rainbow, santa, ladder, birdArray, birdAnimator, moon, presentMeshes;
 var presentEngineArray;
 var loaded, total;
@@ -211,8 +189,7 @@ var numPresentsCollected = 0;
 var textureBg, textureAyu, textureLadder, textureGingerBread, textureSantaHat, textureBell, textureChristmasTree;
 var textureRainbow, textureBird, textureSanta, textureMoon;
 // AUDIO
-var sound 
-
+var sound;
 
 init();
 initParticles();
@@ -233,13 +210,10 @@ function initTexture()
 }
 
 THREE.DefaultLoadingManager.onProgress = function ( item, loaded, total ) {
-	 console.log( item, loaded, total );
-
 	 if (loaded == total) {
 	 	var webaudio = new WebAudio();
 		sound = webaudio.createSound();
-		sound.load('audio/Welcome_My_Lord.mp3', function(sound){
-			
+		sound.load('audio/Welcome_My_Lord.mp3', function(sound){		
 			showStartScreen();
 		});	 	
 	 }
@@ -247,6 +221,8 @@ THREE.DefaultLoadingManager.onProgress = function ( item, loaded, total ) {
 
 $('#start').click(function() {
 	$('#progress').hide();
+	initListener();
+
 	animate();
 	sound.loop(true).play();
 });
@@ -258,6 +234,11 @@ function showStartScreen() {
 	$('#start')[0].className = "enabled";
 }
 
+function initListener() {
+	document.addEventListener("keydown", onDocumentKeyDown, false);
+	document.addEventListener("mousedown", onDocumentMouseDown, false);   
+	document.addEventListener("mousemove", onDocumentMouseMove, false); 
+}
 // FUNCTIONS 		
 function init() {
 	// TEXTURE
@@ -421,17 +402,7 @@ function init() {
 	presentEngineTree.initialize();
 	presentEngineArray.push(presentEngineTree);
 
-	document.addEventListener("keydown", onDocumentKeyDown, false);
-	document.addEventListener("mousedown", onDocumentMouseDown, false);   
-	document.addEventListener("mousemove", onDocumentMouseDown, false); 
 
-	window.addEventListener( 'resize', function() {
-	    var w = window.innerWidth,
-	        h = window.innerHeight;
-	    renderer.setSize( w, h );
-	    camera.aspect = w / h;
-	    camera.updateProjectionMatrix();
-	}, false );
 
 	skyBgEvent = 
 	{ 
@@ -468,10 +439,10 @@ function initParticles() {
 		colorStart: (new THREE.Color()).setRGB(0.5, 0.5, 0.5),
         colorSpread: new THREE.Vector3(1, 1, 1),
 		colorEnd: new THREE.Color('white'),
-		size: 20,
+		size: 50,
 		sizeEnd: 0,
 
-		particlesPerSecond: 500
+		particlesPerSecond: 100
 	});
 
 	particleGroup.addEmitter( emitter );
@@ -515,7 +486,6 @@ function update() {
 	else if (!skyBgEvent["-1500"] && bg.position.y < -1500) {
 	 	skyBgEvent["-1500"] = true;
 	 	engine.emitterAlive = false;
-
 	}
 	else if (!skyBgEvent["-1000"] && bg.position.y < -1000) {
 		skyBgEvent["-1000"] = true;
@@ -608,7 +578,24 @@ function render() {
 }
 
 function onDocumentMouseMove(event) {
-	// console.log(event.clientX + ", " + event.clientY);
+    event.preventDefault();
+    emitter.position.x = (event.clientX - SCREEN_WIDTH / 2);
+    emitter.position.y = - (event.clientY - SCREEN_HEIGHT / 2);
+    emitter.position.z = 0;
+
+    mouseVector = new THREE.Vector3( ( event.clientX / window.innerWidth ) * 2 - 1, - ( event.clientY / window.innerHeight ) * 2 + 1, 1 );
+    projector.unprojectVector( mouseVector, camera );
+    var raycaster = new THREE.Raycaster( camera.position, mouseVector.sub( camera.position ).normalize() );
+	var intersects = raycaster.intersectObjects( presentMeshes );
+	
+    if ( intersects.length > 0 ) {
+    	
+    	intersects[0].object.present.destroy();
+    	numPresentsCollected++;
+    	console.log(numPresentsCollected);
+    }
+     
+    
 
 	// mouseVector.set(
  //        (event.clientX / window.innerWidth) * 2 - 1,
@@ -629,24 +616,12 @@ function onDocumentMouseMove(event) {
  //    console.log("camera.fov: " + camera.fov);
 }	
 
-function onDocumentKeyDown(event){
+function onDocumentKeyDown(event) {
     var keyCode = event.which;
 }
 function onDocumentMouseDown( event ) {
 
-    event.preventDefault();
 
-    var vector = new THREE.Vector3( ( event.clientX / window.innerWidth ) * 2 - 1, - ( event.clientY / window.innerHeight ) * 2 + 1, 1 );
-    projector.unprojectVector( vector, camera );
-    var raycaster = new THREE.Raycaster( camera.position, vector.sub( camera.position ).normalize() );
-	var intersects = raycaster.intersectObjects( presentMeshes );
-	
-    if ( intersects.length > 0 ) {
-    	
-    	intersects[0].object.present.destroy();
-    	numPresentsCollected++;
-    	console.log(numPresentsCollected);
-    }
 }
 
 function restartEngine(parameters)

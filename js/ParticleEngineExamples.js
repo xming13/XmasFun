@@ -422,7 +422,7 @@ Examples =
 		
 		particleTexture : THREE.ImageUtils.loadTexture( 'images/whiteclouds.png'),
 
-		sizeBase     : 200.0,
+		sizeBase     : 300.0,
 		sizeSpread   : 100.0,
 		colorBase    : new THREE.Vector3(0.0, 0.0, 1.0), // H,S,L
 		opacityTween : new Tween([0,1,2,3],[0,1,1,0]),
