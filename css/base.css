@@ -1,15 +1,7 @@
-/*body 
-{
-	font-family: Monospace;
-	font-weight: bold;
-	background-color: #ccccff;
-	margin: 0px;
-	overflow: hidden;
-}*/
-
 html {
 	height: 100%;
 }
+
 body {
 	background:black;
 	color:#fff;
@@ -19,9 +11,6 @@ body {
 	font-family:georgia;
 	text-align:center;
 	height: 100%;	
-}
-
-canvas {
 	cursor: url(../images/santasack.png) 31 39, auto;
 }
 
@@ -36,23 +25,43 @@ canvas {
 }
 
 #progress {
-	color:red;
-	width: 100%;
-	font-size:3em;
-	font-variant:small-caps;
-	font-weight:bold;
+	width: 100%;	
 	position:relative;
 	z-index:2;
 	text-align: center;
+}
+
+#progress img {
+	vertical-align: middle;
+}
+
+#message-top {
+	font-size: 2em;
+	font-variant:small-caps;
+	margin-bottom: 25px;
+}
+
+#message-bottom {
+	font-size: 2em;
+	font-variant:small-caps;	
+	margin-top: 25px;
+}
+
+#loading {
+	color:red;
+	font-size:3em;
+	font-variant:small-caps;
+	font-weight:bold;
 	text-shadow: #000 0px 0px 10px;
 }
 
 #start {
 	color:#fff;
+	font-size:3em;
+	font-variant:small-caps;
+	font-weight:bold;
 	text-shadow: #000 0px 0px 2px;
 	padding:0.1em 0.3em;
-	width:3em;
-	text-align: center;
 	display:none;
 }
 

@@ -10,14 +10,30 @@
 <body>
 	<div id="content">
 		<div id="progress">
-			<span id="message">
+			<div id="message-top">
+				Press 'm' for full screen
+				<br />
+				<br />
+
+				<img src="images/birdsprite.png" height="50" width="100"/> 
+				<img src="images/birdsprite.png" height="50" width="100"/> 
+			</div>
+			<div id="loading">
 				Loading...
-			</span>
-			<center>
-				<div id="start" class="disabled">
-					Start
-				</div>
-			</center>
+			</div>
+			<div id="start" class="disabled">
+				Start
+			</div>
+			<div id="message-bottom">
+				Collect as many 
+				<br />
+				<img src="images/bell.png" height="50" width="50"/> 
+				<img src="images/santahat.png" height="50" width="50"/> 
+				<img src="images/gingerbread.png" height="50" width="50"/> 
+				<img src="images/christmastree.png" height="50" width="50"/> 
+				<br />
+				as you can!		
+			</div>
 		</div>
 	</div>
 <script>
@@ -53,16 +69,24 @@
 <div id="infoBox" title="Merry Christmas and Happy New Year!">
 	If you have any feedback / suggestion for improvement, 
 	<br/>
-	please email me at <a href="mailto:weiseng@xtremax.com">weiseng@xtremax.com</a>
+	please email me at <a href="mailto:weiseng@xtremax.com">weiseng@xtremax.com</a>, thank you! :)
+	<br/>
+	<br/>
+	* full source code can be found at <a href="https://github.com/xming13/XmasFun" target="_blank">https://github.com/xming13/XmasFun</a>
 	<br />
 	<br />
-		Credit to
+		<b>Credits to</b>
 		<br/> 
 		<a href="https://github.com/mrdoob" target="_blank">mrdoob</a> for the awesome three.js
 
 		<br/>
 		<a href="https://github.com/stemkoski" target="_blank">Lee Stemkoski </a> and 
 		<a href="https://github.com/squarefeet" target="_blank">squarefeet </a> for the ParticleSystem script	
+		<br />
+		<br />
+		<u>Background Music</u>
+		<br/>
+		 Welcome, My Lord! (Ragnarok Online BGM Track 55) - Artist: SoundTeMP
 </div>
 
 <!-- ------------------------------------------------------------ -->
@@ -74,7 +98,7 @@
 // standard global variables
 var container, scene, camera, renderer, controls, stats, cssRenderer, projector, ray;
 // objects
-var floor, bg, engine, engine2, engine3, skyBgEvent, ayu, ayuAnimator, rainbow, santa, ladder, birdArray, birdAnimator, moon, presentMeshes;
+var floor, bg, engine, engine2, engine3, skyBgEvent, ayu, ayuAnimator, ayuFront, rainbow, santa, ladder, birdArray, birdAnimator, moon, presentMeshes;
 var presentEngineArray;
 var loaded, total;
 // Used in initParticles()
@@ -84,7 +108,7 @@ var keyboard = new THREEx.KeyboardState();
 var clock = new THREE.Clock();
 var numPresentsCollected = 0;
 // TEXTURE
-var textureBg, textureAyu, textureLadder, textureGingerBread, textureSantaHat, textureBell, textureChristmasTree;
+var textureBg, textureAyu, textureAyuFront, textureLadder, textureGingerBread, textureSantaHat, textureBell, textureChristmasTree;
 var textureRainbow, textureBird, textureSanta, textureMoon;
 // AUDIO
 var sound;
@@ -128,7 +152,7 @@ function onDocumentMouseMove(event) {
 } 
 
 function showStartScreen() {
-	$('#message')[0].style.display = "none";
+	$('#loading')[0].style.display = "none";
 	$('#start')[0].style.display = "block";
 	$('#start')[0].className = "enabled";
 }
@@ -208,7 +232,7 @@ function init() {
 	// AYU 
 	ayuAnimator = new TextureAnimator( textureAyu, 4, 1, 4, 100);
 	var ayuMaterial = new THREE.MeshBasicMaterial( { map: textureAyu, side: THREE.FrontSide, transparent: true });
-	var ayuGeometry = new THREE.PlaneGeometry(50, 50);
+	var ayuGeometry = new THREE.PlaneGeometry(42, 50);
 	ayu = new THREE.Mesh(ayuGeometry, ayuMaterial);
 	ayu.position.set(0, 0, 151);
 	scene.add(ayu);
@@ -300,7 +324,7 @@ function init() {
 		"-1000": false, 
 		"-1500": false, 
 		"-3000": false,
-		"-3500": false,
+		"-4500": false,
 		"-5899": false,
 		"-5900": false
 	};
@@ -310,6 +334,7 @@ function init() {
 function initTexture() {
 	textureBg = new THREE.ImageUtils.loadTexture( 'images/bg.png' );
 	textureAyu = new THREE.ImageUtils.loadTexture( 'images/AyuSprite.png' );
+	textureAyuFront = new THREE.ImageUtils.loadTexture( 'images/AyuFront.png' );
 	textureLadder = new THREE.ImageUtils.loadTexture( 'images/ladder.png' );
 	textureGingerBread = new THREE.ImageUtils.loadTexture( 'images/gingerbread.png' );
 	textureSantaHat = new THREE.ImageUtils.loadTexture( 'images/santahat.png' );
@@ -372,8 +397,8 @@ function update() {
 		engine3.setValues( Examples.m_starfountain );
 		engine3.initialize();
 	}
-	else if (!skyBgEvent["-3500"] && bg.position.y < -4500) {
-		skyBgEvent["-3500"] = true;
+	else if (!skyBgEvent["-4500"] && bg.position.y < -4500) {
+		skyBgEvent["-4500"] = true;
 		initEventMoon();
 	}
 	else if (!skyBgEvent["-3000"] && bg.position.y < -3000) {
@@ -653,6 +678,14 @@ function showResult() {
 	textMesh2.rotation.x = 0;
 	textMesh2.rotation.y = Math.PI * 2;
 	scene.add( textMesh2 );
+
+
+	var ayuFrontMaterial = new THREE.MeshBasicMaterial( { map: textureAyuFront, side: THREE.FrontSide, transparent: true });
+	var ayuFrontGeometry = new THREE.PlaneGeometry(50, 50);
+	ayuFront = new THREE.Mesh(ayuFrontGeometry, ayuFrontMaterial);
+	ayuFront.position.set(0, 0, 151);
+	scene.add(ayuFront);
+	scene.remove(ayu);
 }
 function TextureAnimator(texture, tilesHoriz, tilesVert, numTiles, tileDispDuration) {	
 	// note: texture passed by reference, will be updated by the update function.
