@@ -75,7 +75,6 @@ body {
 }
 
 .disabled {
-	background:gray;
 	cursor:default;
 }
 
