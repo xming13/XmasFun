@@ -470,7 +470,10 @@ function update() {
 		}
 	}
 	if (keyboard.pressed("c")) {
-		allowMouseControls = !allowMouseControls;
+		allowMouseControls = true;
+	}
+	if (keyboard.pressed("v")) {
+		allowMouseControls = false;
 	}
 	if (keyboard.pressed("r")) {
 		camera.position.set(0, 0, 500);
