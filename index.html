@@ -118,11 +118,16 @@ init();
 
 THREE.DefaultLoadingManager.onProgress = function ( item, loaded, total ) {
 	 if (loaded == total) {
-	 	var webaudio = new WebAudio();
-		sound = webaudio.createSound();
-		sound.load('audio/Welcome_My_Lord.mp3', function(sound){		
+	 	try {
+	 		var webaudio = new WebAudio();
+			sound = webaudio.createSound();
+			sound.load('audio/Welcome_My_Lord.mp3', function(sound){		
+				showStartScreen();
+			});	 	
+		}
+		catch (error) {
 			showStartScreen();
-		});	 	
+		}
 	 }
 };
 
@@ -130,7 +135,9 @@ $('#start').click(function() {
 	$('#progress').hide();
 	document.addEventListener("mousemove", onDocumentMouseMove, false);
 	animate();
-	sound.loop(true).play();
+	if (sound) {
+		sound.loop(true).play();
+	}
 });
 
 function onDocumentMouseMove(event) {
