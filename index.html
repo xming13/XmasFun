@@ -201,11 +201,11 @@ function init() {
 	// CONTROLS
 	controls = new THREE.OrbitControls( camera, renderer.domElement );
 	// STATS
-	stats = new Stats();
-	stats.domElement.style.position = 'absolute';
-	stats.domElement.style.bottom = '0px';
-	stats.domElement.style.zIndex = 100;
-	container.appendChild( stats.domElement );
+	// stats = new Stats();
+	// stats.domElement.style.position = 'absolute';
+	// stats.domElement.style.bottom = '0px';
+	// stats.domElement.style.zIndex = 100;
+	// container.appendChild( stats.domElement );
 	// LIGHT
 	// var light = new THREE.PointLight(0xffffff);
 	// light.position.set(0,250,0);
@@ -490,7 +490,7 @@ function update() {
 	if (allowMouseControls) {
 		controls.update(); 
 	}
-	stats.update();	
+	// stats.update();	
 }
 function render() {
 	particleGroup.tick( 0.016 );
