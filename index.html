@@ -5,6 +5,7 @@
 	<title>Xmas Fun (Three.js)</title>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+<<<<<<< HEAD
 	<link rel="stylesheet" href="css/base.css"/>
 </head>
 <body>
@@ -105,6 +106,39 @@
 	</div>
 	<div id="ThreeJS" style="position: absolute; left:0px; top:0px; display: none;">
 	</div>
+=======
+	<link rel=stylesheet href="css/base.css"/>
+</head>
+<body>
+	<div id="content">
+		<div id="progress">
+			<div id="message-top">
+				Press 'm' for full screen
+				<br />
+				<br />
+
+				<img src="images/birdsprite.png" height="50" width="100"/> 
+				<img src="images/birdsprite.png" height="50" width="100"/> 
+			</div>
+			<div id="loading">
+				Loading...
+			</div>
+			<div id="start" class="disabled">
+				Start
+			</div>
+			<div id="message-bottom">
+				Collect as many 
+				<br />
+				<img src="images/bell.png" height="50" width="50"/> 
+				<img src="images/santahat.png" height="50" width="50"/> 
+				<img src="images/gingerbread.png" height="50" width="50"/> 
+				<img src="images/christmastree.png" height="50" width="50"/> 
+				<br />
+				as you can!		
+			</div>
+		</div>
+	</div>
+>>>>>>> 5dcabbbb2b32d9e3aab85439505f0e4f6849e9ee
 <script>
 	var SCREEN_WIDTH = window.innerWidth;
 	var SCREEN_HEIGHT = window.innerHeight;
@@ -126,11 +160,50 @@
 <script src="js/ShaderParticleEmitter.js"></script>
 <script src="fonts/optimer_regular.typeface.js"></script>
 <script src="fonts/optimer_bold.typeface.js"></script>
+<<<<<<< HEAD
 <script src="js/jquery-1.9.1.js"></script>
+=======
+
+<!-- jQuery code to display an information button and box when clicked. -->
+<script src="js/jquery-1.9.1.js"></script>
+<script src="js/jquery-ui.js"></script>
+<script src="js/info.js"></script>
+<link rel=stylesheet href="css/jquery-ui.css" />
+<link rel=stylesheet href="css/info.css"/>
+
+<div id="infoButton"></div>
+<div id="infoBox" title="Merry Christmas and Happy New Year!">
+	If you have any feedback / suggestion for improvement, 
+	<br/>
+	please email me at <a href="mailto:xiaoming33@gmail.com">xiaoming33@gmail.com</a>, thank you! :)
+	<br/>
+	<br/>
+	* full source code can be found at <a href="https://github.com/xming13/XmasFun" target="_blank">https://github.com/xming13/XmasFun</a>
+	<br />
+	<br />
+		<b>Credits to</b>
+		<br/> 
+		<a href="https://github.com/mrdoob" target="_blank">mrdoob</a> for the awesome three.js
+
+		<br/>
+		<a href="https://github.com/stemkoski" target="_blank">Lee Stemkoski </a> and 
+		<a href="https://github.com/squarefeet" target="_blank">squarefeet </a> for the ParticleSystem script	
+		<br />
+		<br />
+		<u>Background Music</u>
+		<br/>
+		 Welcome, My Lord! (Ragnarok Online BGM Track 55) - Artist: SoundTeMP
+</div>
+
+<!-- ------------------------------------------------------------ -->
+
+<div id="ThreeJS" style="position: absolute; left:0px; top:0px"></div>
+>>>>>>> 5dcabbbb2b32d9e3aab85439505f0e4f6849e9ee
 <script>
 // MAIN
 
 // standard global variables
+<<<<<<< HEAD
 var container, 
 	scene, 
 	camera, 
@@ -185,6 +258,25 @@ var textureBg,
 // AUDIO
 var sound,
 	allowMouseControls = false;
+=======
+var container, scene, camera, renderer, controls, stats, cssRenderer, projector, ray;
+// objects
+var floor, bg, engine, engine2, engine3, skyBgEvent, ayu, ayuAnimator, ayuFront, rainbow, santa, ladder, birdArray, birdAnimator, moon, presentMeshes;
+var presentEngineArray;
+var loaded, total;
+// Used in initParticles()
+var emitter, particleGroup;
+var mouseX, mouseY, mouseVector = new THREE.Vector3();
+var keyboard = new THREEx.KeyboardState();
+var clock = new THREE.Clock();
+var numPresentsCollected = 0;
+// TEXTURE
+var textureBg, textureAyu, textureAyuFront, textureLadder, textureGingerBread, textureSantaHat, textureBell, textureChristmasTree;
+var textureRainbow, textureBird, textureSanta, textureMoon;
+// AUDIO
+var sound;
+var allowMouseControls = false;
+>>>>>>> 5dcabbbb2b32d9e3aab85439505f0e4f6849e9ee
 
 init();
 
@@ -203,6 +295,7 @@ THREE.DefaultLoadingManager.onProgress = function ( item, loaded, total ) {
 	 }
 };
 
+<<<<<<< HEAD
 function showStartScreen() {
 	$('#panel-loading').fadeOut(function() {
 		$('#panel-main').fadeIn();
@@ -212,6 +305,10 @@ function showStartScreen() {
 $('#link-play').click(function() {
 	$('#content').hide();
 	$('#scorePanel, #ThreeJS').show();
+=======
+$('#start').click(function() {
+	$('#progress').hide();
+>>>>>>> 5dcabbbb2b32d9e3aab85439505f0e4f6849e9ee
 	document.addEventListener("mousemove", onDocumentMouseMove, false);
 	animate();
 	if (sound) {
@@ -219,6 +316,7 @@ $('#link-play').click(function() {
 	}
 });
 
+<<<<<<< HEAD
 $('#link-about').click(function() {
 	$('#panel-main').fadeOut(function() {
 		$('#panel-about').fadeIn();
@@ -240,6 +338,8 @@ $('.link-back').click(function() {
 	});
 });
 
+=======
+>>>>>>> 5dcabbbb2b32d9e3aab85439505f0e4f6849e9ee
 function onDocumentMouseMove(event) {
     event.preventDefault();
     emitter.position.x = (event.clientX - SCREEN_WIDTH / 2);
@@ -255,10 +355,22 @@ function onDocumentMouseMove(event) {
     	
     	intersects[0].object.present.destroy();
     	numPresentsCollected++;
+<<<<<<< HEAD
     	$('#numPresentCollected').html(numPresentsCollected);
     }
 } 
 
+=======
+    }
+} 
+
+function showStartScreen() {
+	$('#loading')[0].style.display = "none";
+	$('#start')[0].style.display = "inline";
+	$('#start')[0].className = "enabled";
+}
+
+>>>>>>> 5dcabbbb2b32d9e3aab85439505f0e4f6849e9ee
 // FUNCTIONS 		
 function init() {
 	// TEXTURE
@@ -301,6 +413,31 @@ function init() {
 	// stats.domElement.style.bottom = '0px';
 	// stats.domElement.style.zIndex = 100;
 	// container.appendChild( stats.domElement );
+<<<<<<< HEAD
+=======
+	// LIGHT
+	// var light = new THREE.PointLight(0xffffff);
+	// light.position.set(0,250,0);
+	//scene.add(light);
+	// FLOOR
+	// var floorTexture = new THREE.ImageUtils.loadTexture( 'images/checkerboard.jpg' );
+	// floorTexture.wrapS = floorTexture.wrapT = THREE.RepeatWrapping; 
+	// floorTexture.repeat.set( 10, 100 );
+	// var floorMaterial = new THREE.MeshBasicMaterial( { map: floorTexture, side: THREE.DoubleSide } );
+	// var floorGeometry = new THREE.PlaneGeometry(1000, 10000, 10, 10);
+	// floor = new THREE.Mesh(floorGeometry, floorMaterial);
+	// floor.position.y = -0.5;
+	// floor.rotation.x = Math.PI / 2;
+	//scene.add(floor);
+
+	// SKYBOX/FOG
+	// var skyBoxGeometry = new THREE.CubeGeometry( 10000, 10000, 10000 );
+	// var skyBoxMaterial = new THREE.MeshBasicMaterial( { color: 0x9999ff, side: THREE.BackSide } );
+	// var skyBox = new THREE.Mesh( skyBoxGeometry, skyBoxMaterial );
+ 	// skyBox.flipSided = true; // render faces from inside of the cube, instead of from outside (default).
+	// scene.add(skyBox);
+	// scene.fog = new THREE.FogExp2( 0x9999ff, 0.00025 );
+>>>>>>> 5dcabbbb2b32d9e3aab85439505f0e4f6849e9ee
 
 	// BACKGROUND
 	var bgMaterial = new THREE.MeshBasicMaterial( { map: textureBg, side: THREE.FrontSide });
