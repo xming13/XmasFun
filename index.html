@@ -5,36 +5,105 @@
 	<title>Xmas Fun (Three.js)</title>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-	<link rel=stylesheet href="css/base.css"/>
+	<link rel="stylesheet" href="css/base.css"/>
 </head>
 <body>
-	<div id="content">
-		<div id="progress">
-			<div id="message-top">
-				Press 'm' for full screen
-				<br />
-				<br />
+	<div id="menu">
+		<div id="content">
+			<div id="panel-loading" class="panel">
+				LOADING...
+			</div>
+			<div id="panel-main" class="panel" style="display: none;">
+				<div class="title">XMAS FUN</div> 
+				<div class="subtitle">Collect christmas presents!</div> 
+				<div class="sprite"><img src="images/AyuFront.png" /></div>
+				<div class="play"><a id="link-play" class="btn-play">PLAY</a></div>
+				<div class="sublinks">
+					<a id="link-instructions" class="first-link">INSTRUCTIONS</a>
+					<a id="link-about">ABOUT</a>
+					<a id="link-highscores">CREDITS</a>
+				</div>
+			</div>
+			<div id="panel-instructions" class="panel" style="display: none;">
+				<div class="title">INSTRUCTIONS</div> 
+				<div class="instruction-text">
+					Move your mouse over the presents
+					
+					<br />
+					<br />
+					<img src="images/bell.png" height="50" width="50"/> 
+					<img src="images/santahat.png" height="50" width="50"/> 
+					<img src="images/gingerbread.png" height="50" width="50"/> 
+					<img src="images/christmastree.png" height="50" width="50"/>
+					<br />
+					<br />
 
-				<img src="images/birdsprite.png" height="50" width="100"/> 
-				<img src="images/birdsprite.png" height="50" width="100"/> 
+					Collect as many as you can
+					<br />
+					<br />
+					Press 'm' for full screen
+				</div>
+				<div class="sublinks">
+					<a class="first-link link-back">Back</a>
+				</div>
 			</div>
-			<div id="loading">
-				Loading...
+			<div id="panel-about" class="panel" style="display: none;">
+				<div class="title">ABOUT</div> 
+				<div class="about-text">XmasFun is a game made using 
+					<a href="https://github.com/mrdoob/three.js" target="_blank">three.js</a>.
+					<br />
+					<br />
+					Source code can be found at
+					<a href="https://github.com/xming13/XmasFun" target="_blank">
+						here
+					</a>.
+					<br />
+					<br />
+					We appreciate any feedback or comments,
+					<br /> 
+					just drop us an email at
+					<br /> 
+					<a href="mailto:xiaoming33@gmail.com">xiaoming33@gmail.com</a>.
+					<br /> 
+					<br /> 
+				</div> 
+				<div class="sublinks">
+					<a class="first-link link-back">Back</a>
+				</div>
 			</div>
-			<div id="start" class="disabled">
-				Start
-			</div>
-			<div id="message-bottom">
-				Collect as many 
-				<br />
-				<img src="images/bell.png" height="50" width="50"/> 
-				<img src="images/santahat.png" height="50" width="50"/> 
-				<img src="images/gingerbread.png" height="50" width="50"/> 
-				<img src="images/christmastree.png" height="50" width="50"/> 
-				<br />
-				as you can!		
+			<div id="panel-highscores" class="panel" style="display: none;">
+				<div class="title">CREDITS</div> 
+				<div class="about-text">
+					Many thanks to
+					<br />
+					<br />
+					<a href="https://github.com/mrdoob/three.js" target="_blank">three.js</a> by <a href="https://github.com/mrdoob" target="_blank">mrdoob</a>
+					<br />
+					<br />
+					<a href="https://github.com/stemkoski/stemkoski.github.com/blob/master/Three.js/js/ParticleEngine.js" target="_blank">ParticleEngine.js</a> by <a href="https://github.com/stemkoski" target="_blank">Lee Stemkoski </a>
+					<br />
+					<br />
+					<a href="http://hoverstud.io/babbit/">pretty design</a> copied from
+					<a href="http://hoverstud.io/">Hover Studio</a>
+					<br />
+					<br />
+					Background Music - Welcome My Lord! 
+					<br />
+					(Ragnarok Online BGM Track 55)
+					<br />
+					by SoundTemp
+				</div>
+				<div class="sublinks">
+					<a class="first-link link-back">Back</a>
+				</div>
 			</div>
 		</div>
+	</div>
+	<div id="scorePanel" style="display: none;">
+		<img src="images/present.png" />
+		<span id="numPresentCollected">0</span>
+	</div>
+	<div id="ThreeJS" style="position: absolute; left:0px; top:0px; display: none;">
 	</div>
 <script>
 	var SCREEN_WIDTH = window.innerWidth;
@@ -57,62 +126,65 @@
 <script src="js/ShaderParticleEmitter.js"></script>
 <script src="fonts/optimer_regular.typeface.js"></script>
 <script src="fonts/optimer_bold.typeface.js"></script>
-
-<!-- jQuery code to display an information button and box when clicked. -->
 <script src="js/jquery-1.9.1.js"></script>
-<script src="js/jquery-ui.js"></script>
-<script src="js/info.js"></script>
-<link rel=stylesheet href="css/jquery-ui.css" />
-<link rel=stylesheet href="css/info.css"/>
-
-<div id="infoButton"></div>
-<div id="infoBox" title="Merry Christmas and Happy New Year!">
-	If you have any feedback / suggestion for improvement, 
-	<br/>
-	please email me at <a href="mailto:xiaoming33@gmail.com">xiaoming33@gmail.com</a>, thank you! :)
-	<br/>
-	<br/>
-	* full source code can be found at <a href="https://github.com/xming13/XmasFun" target="_blank">https://github.com/xming13/XmasFun</a>
-	<br />
-	<br />
-		<b>Credits to</b>
-		<br/> 
-		<a href="https://github.com/mrdoob" target="_blank">mrdoob</a> for the awesome three.js
-
-		<br/>
-		<a href="https://github.com/stemkoski" target="_blank">Lee Stemkoski </a> and 
-		<a href="https://github.com/squarefeet" target="_blank">squarefeet </a> for the ParticleSystem script	
-		<br />
-		<br />
-		<u>Background Music</u>
-		<br/>
-		 Welcome, My Lord! (Ragnarok Online BGM Track 55) - Artist: SoundTeMP
-</div>
-
-<!-- ------------------------------------------------------------ -->
-
-<div id="ThreeJS" style="position: absolute; left:0px; top:0px"></div>
 <script>
 // MAIN
 
 // standard global variables
-var container, scene, camera, renderer, controls, stats, cssRenderer, projector, ray;
+var container, 
+	scene, 
+	camera, 
+	renderer, 
+	controls, 
+	stats, 
+	cssRenderer, 
+	projector, 
+	ray;
 // objects
-var floor, bg, engine, engine2, engine3, skyBgEvent, ayu, ayuAnimator, ayuFront, rainbow, santa, ladder, birdArray, birdAnimator, moon, presentMeshes;
-var presentEngineArray;
-var loaded, total;
+var floor, 
+	bg, 
+	engine, 
+	engine2, 
+	engine3, 
+	skyBgEvent, 
+	ayu, 
+	ayuAnimator, 
+	ayuFront, 
+	rainbow, 
+	santa, 
+	ladder, 
+	birdArray, 
+	birdAnimator,
+	moon, 
+	presentMeshes,
+	presentEngineArray,
+	loaded, 
+	total;
 // Used in initParticles()
-var emitter, particleGroup;
-var mouseX, mouseY, mouseVector = new THREE.Vector3();
-var keyboard = new THREEx.KeyboardState();
-var clock = new THREE.Clock();
-var numPresentsCollected = 0;
+var emitter, 
+	particleGroup,
+	mouseX, 
+	mouseY, 
+	mouseVector = new THREE.Vector3(),
+	keyboard = new THREEx.KeyboardState(),
+	clock = new THREE.Clock(),
+	numPresentsCollected = 0;
 // TEXTURE
-var textureBg, textureAyu, textureAyuFront, textureLadder, textureGingerBread, textureSantaHat, textureBell, textureChristmasTree;
-var textureRainbow, textureBird, textureSanta, textureMoon;
+var textureBg, 
+	textureAyu, 
+	textureAyuFront, 
+	textureLadder, 
+	textureGingerBread, 
+	textureSantaHat, 
+	textureBell, 
+	textureChristmasTree,
+	textureRainbow, 
+	textureBird, 
+	textureSanta, 
+	textureMoon;
 // AUDIO
-var sound;
-var allowMouseControls = false;
+var sound,
+	allowMouseControls = false;
 
 init();
 
@@ -131,13 +203,41 @@ THREE.DefaultLoadingManager.onProgress = function ( item, loaded, total ) {
 	 }
 };
 
-$('#start').click(function() {
-	$('#progress').hide();
+function showStartScreen() {
+	$('#panel-loading').fadeOut(function() {
+		$('#panel-main').fadeIn();
+	});	
+}
+
+$('#link-play').click(function() {
+	$('#content').hide();
+	$('#scorePanel, #ThreeJS').show();
 	document.addEventListener("mousemove", onDocumentMouseMove, false);
 	animate();
 	if (sound) {
 		sound.loop(true).play();
 	}
+});
+
+$('#link-about').click(function() {
+	$('#panel-main').fadeOut(function() {
+		$('#panel-about').fadeIn();
+	});	
+});
+$('#link-instructions').click(function() {
+	$('#panel-main').fadeOut(function() {
+		$('#panel-instructions').fadeIn();
+	});	
+});
+$('#link-highscores').click(function() {
+	$('#panel-main').fadeOut(function() {
+		$('#panel-highscores').fadeIn();
+	});	
+});
+$('.link-back').click(function() {
+	$(this).parent().parent().fadeOut(function() {
+		$('#panel-main').fadeIn();
+	});
 });
 
 function onDocumentMouseMove(event) {
@@ -155,14 +255,9 @@ function onDocumentMouseMove(event) {
     	
     	intersects[0].object.present.destroy();
     	numPresentsCollected++;
+    	$('#numPresentCollected').html(numPresentsCollected);
     }
 } 
-
-function showStartScreen() {
-	$('#loading')[0].style.display = "none";
-	$('#start')[0].style.display = "inline";
-	$('#start')[0].className = "enabled";
-}
 
 // FUNCTIONS 		
 function init() {
@@ -201,33 +296,11 @@ function init() {
 	// CONTROLS
 	controls = new THREE.OrbitControls( camera, renderer.domElement );
 	// STATS
-	stats = new Stats();
-	stats.domElement.style.position = 'absolute';
-	stats.domElement.style.bottom = '0px';
-	stats.domElement.style.zIndex = 100;
-	container.appendChild( stats.domElement );
-	// LIGHT
-	// var light = new THREE.PointLight(0xffffff);
-	// light.position.set(0,250,0);
-	//scene.add(light);
-	// FLOOR
-	// var floorTexture = new THREE.ImageUtils.loadTexture( 'images/checkerboard.jpg' );
-	// floorTexture.wrapS = floorTexture.wrapT = THREE.RepeatWrapping; 
-	// floorTexture.repeat.set( 10, 100 );
-	// var floorMaterial = new THREE.MeshBasicMaterial( { map: floorTexture, side: THREE.DoubleSide } );
-	// var floorGeometry = new THREE.PlaneGeometry(1000, 10000, 10, 10);
-	// floor = new THREE.Mesh(floorGeometry, floorMaterial);
-	// floor.position.y = -0.5;
-	// floor.rotation.x = Math.PI / 2;
-	//scene.add(floor);
-
-	// SKYBOX/FOG
-	// var skyBoxGeometry = new THREE.CubeGeometry( 10000, 10000, 10000 );
-	// var skyBoxMaterial = new THREE.MeshBasicMaterial( { color: 0x9999ff, side: THREE.BackSide } );
-	// var skyBox = new THREE.Mesh( skyBoxGeometry, skyBoxMaterial );
- 	// skyBox.flipSided = true; // render faces from inside of the cube, instead of from outside (default).
-	// scene.add(skyBox);
-	// scene.fog = new THREE.FogExp2( 0x9999ff, 0.00025 );
+	// stats = new Stats();
+	// stats.domElement.style.position = 'absolute';
+	// stats.domElement.style.bottom = '0px';
+	// stats.domElement.style.zIndex = 100;
+	// container.appendChild( stats.domElement );
 
 	// BACKGROUND
 	var bgMaterial = new THREE.MeshBasicMaterial( { map: textureBg, side: THREE.FrontSide });
@@ -348,7 +421,7 @@ function initTexture() {
 	textureBell = new THREE.ImageUtils.loadTexture( 'images/bell.png' );
 	textureChristmasTree = new THREE.ImageUtils.loadTexture( 'images/christmastree.png' );
 	textureRainbow = new THREE.ImageUtils.loadTexture( 'images/rainbow.png' );
-	textureBird = new THREE.ImageUtils.loadTexture( 'images/birdSprite.png' );
+	textureBird = new THREE.ImageUtils.loadTexture( 'images/birdsprite.png' );
 	textureSanta = new THREE.ImageUtils.loadTexture( 'images/santa.png' );
 	textureMoon = new THREE.ImageUtils.loadTexture( 'images/moon.png' );
 }
@@ -490,7 +563,7 @@ function update() {
 	if (allowMouseControls) {
 		controls.update(); 
 	}
-	stats.update();	
+	// stats.update();	
 }
 function render() {
 	particleGroup.tick( 0.016 );
