@@ -121,7 +121,7 @@ a:hover {
 #scorePanel {
 	position: absolute; 
 	bottom: 0px; 
-	left: 0px; 
+	left: 20px; 
 	z-index: 100;
 	font-size: 100px;
 }

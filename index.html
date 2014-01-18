@@ -11,6 +11,8 @@
 		<div id="content">
 			<div id="panel-loading" class="panel">
 				LOADING...
+				<br />
+				<span id="progress-percent"></span>
 			</div>
 			<div id="panel-main" class="panel" style="display: none;">
 				<div class="title">XMAS FUN</div> 
@@ -188,7 +190,11 @@ var sound,
 init();
 
 THREE.DefaultLoadingManager.onProgress = function ( item, loaded, total ) {
-	 if (loaded == total) {
+
+	var percentDone = loaded / total * 90;
+	$('#progress-percent').html(percentDone + '%');
+
+	if (loaded == total) {
 	 	try {
 	 		var webaudio = new WebAudio();
 			sound = webaudio.createSound();
@@ -404,8 +410,8 @@ function init() {
 		"-1500": false, 
 		"-3000": false,
 		"-4500": false,
-		"-5899": false,
-		"-5900": false
+		"-5900": false,
+		"-6099": false
 	};
 
 	initParticles();
@@ -469,12 +475,21 @@ function update() {
 			presentEngineArray[i].update(dt * 0.5);
 		}
 	}
-
-	if (!skyBgEvent["-5899"] && bg.position.y < -5899) {
-		skyBgEvent["-5899"] = true;
+	if (!skyBgEvent["-6099"] && bg.position.y < -6099) {
+		skyBgEvent["-6099"] = true;
 		engine3 = new ParticleEngine();
 		engine3.setValues( Examples.m_starfountain );
 		engine3.initialize();
+	}
+	else if (!skyBgEvent["-5900"] && bg.position.y < -5900) {
+		skyBgEvent["-5900"] = true;
+		for (var i = 0; i < presentEngineArrayLength; i++) {
+			var presentEngine = presentEngineArray[i];
+			if (presentEngine) {
+				presentEngine.destroy();
+			}
+		}
+		showResult();
 	}
 	else if (!skyBgEvent["-4500"] && bg.position.y < -4500) {
 		skyBgEvent["-4500"] = true;
@@ -518,6 +533,8 @@ function update() {
 		skyBgEvent["5500"] = true; 
 		initEventRainbow();
 	}
+
+	
 	if (bg.position.y > -5900) 
 	{
 		bg.position.y -= 2;;
@@ -534,20 +551,17 @@ function update() {
 			}
 		}
 	}
-	else
+	else if (bg.position.y > - 6100)
 	{
-		for (var i = 0; i < presentEngineArrayLength; i++) {
-			var presentEngine = presentEngineArray[i];
-			if (presentEngine) {
-				presentEngine.destroy();
-			}
-		}
-		if (!skyBgEvent["-5900"])
-		{
-			skyBgEvent["-5900"] = true;
-			showResult();
+		bg.position.y -= 2;
+		ladder.position.y -= 2;
+		moon.position.y -= 2;
+
+		if (ayuFront) {
+			ayuFront.position.y -= 2;
 		}
 	}
+
 	if (keyboard.pressed("c")) {
 		allowMouseControls = true;
 	}
@@ -561,6 +575,19 @@ function update() {
 	}
 	if (allowMouseControls) {
 		controls.update(); 
+	}
+	if (keyboard.pressed("q")) {
+		bg.position.y = -5000;
+		ladder.position.y = -5120;
+		skyBgEvent["3900"] = true; 
+		skyBgEvent["3300"] = true; 
+		skyBgEvent["2300"] = true; 
+		skyBgEvent["1000"] = true; 
+		skyBgEvent["0"] = true; 
+		skyBgEvent["-1000"] = true; 
+		skyBgEvent["-1500"] = true; 
+		skyBgEvent["-3000"] = true; 
+		skyBgEvent["-4500"] = true; 
 	}
 	// stats.update();	
 }
@@ -755,7 +782,7 @@ function showResult() {
 	textMesh2.position.z = 200;
 	textMesh2.scale.set(3/5, 3/5, 3/5);
 	scene.add( textMesh2 );
-	
+
 	var ayuFrontMaterial = new THREE.MeshBasicMaterial( { map: textureAyuFront, side: THREE.FrontSide, transparent: true });
 	var ayuFrontGeometry = new THREE.PlaneGeometry(50, 50);
 	ayuFront = new THREE.Mesh(ayuFrontGeometry, ayuFrontMaterial);
