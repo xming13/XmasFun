@@ -117,7 +117,6 @@
 <script src="js/OrbitControls.js"></script>
 <script src="js/THREEx.KeyboardState.js"></script>
 <script src="js/THREEx.FullScreen.js"></script>
-<script src="js/THREEx.WindowResize.js"></script>
 <script src="js/THREE.CSS3DRenderer.js"></script> 
 <script src="js/webaudio.js"></script>
 <script src="js/ParticleEngine.js"></script>
@@ -218,6 +217,7 @@ $('#link-play').click(function() {
 	$('#content').hide();
 	$('#scorePanel, #ThreeJS').show();
 	document.addEventListener("mousemove", onDocumentMouseMove, false);
+	window.addEventListener("resize", onWindowResize, false);
 	animate();
 	if (sound) {
 		sound.loop(true).play();
@@ -247,22 +247,43 @@ $('.link-back').click(function() {
 
 function onDocumentMouseMove(event) {
     event.preventDefault();
-    emitter.position.x = (event.clientX - SCREEN_WIDTH / 2);
-    emitter.position.y = - (event.clientY - SCREEN_HEIGHT / 2);
-    emitter.position.z = 0;
-
-    mouseVector = new THREE.Vector3( ( event.clientX / window.innerWidth ) * 2 - 1, - ( event.clientY / window.innerHeight ) * 2 + 1, 1 );
+    mouseVector = new THREE.Vector3( 
+    	( event.clientX / window.innerWidth ) * 2 - 1, 
+    	- ( event.clientY / window.innerHeight ) * 2 + 1, 
+    	1
+    );
     projector.unprojectVector( mouseVector, camera );
-    var raycaster = new THREE.Raycaster( camera.position, mouseVector.sub( camera.position ).normalize() );
+    var dir = mouseVector.sub( camera.position ).normalize();
+
+    var raycaster = new THREE.Raycaster( 
+    	camera.position, 
+    	dir
+    );
 	var intersects = raycaster.intersectObjects( presentMeshes );
-	
+
     if ( intersects.length > 0 ) {
-    	
     	intersects[0].object.present.destroy();
     	numPresentsCollected++;
     	$('#numPresentCollected').html(numPresentsCollected);
     }
+
+    var distance = - camera.position.z / dir.z;
+    var pos = camera.position.clone().add( dir.multiplyScalar( distance ) );
+
+    emitter.position.x = pos.x;
+    emitter.position.y = pos.y;							
+    emitter.position.z = pos.z;
 } 
+
+function onWindowResize() {
+	var width 		= window.innerWidth;
+	var height		= window.innerHeight;
+	camera.aspect 	= width / height;
+	camera.updateProjectionMatrix();
+	renderer.setSize(width, height);	
+	scene.remove( particleGroup.mesh );
+	initParticles();
+}
 
 // FUNCTIONS 		
 function init() {
@@ -271,7 +292,7 @@ function init() {
 	// SCENE
 	scene = new THREE.Scene();
 	// CAMERA
-	var ASPECT = SCREEN_WIDTH / SCREEN_HEIGHT, NEAR = 0.1, FAR = 20000;
+	var ASPECT = SCREEN_WIDTH / SCREEN_HEIGHT, NEAR = 0.1, FAR = 10000;
 	camera = new THREE.PerspectiveCamera( VIEW_ANGLE, ASPECT, NEAR, FAR);
 	camera.position.set(0, 0, 500);
 	camera.up = new THREE.Vector3(0, 1, 0);
@@ -296,7 +317,6 @@ function init() {
 	// PRESENT MESHES
 	presentMeshes = [];
 	// EVENTS
-	THREEx.WindowResize(renderer, camera);
 	THREEx.FullScreen.bindKey({ charCode : 'm'.charCodeAt(0) });
 	// CONTROLS
 	controls = new THREE.OrbitControls( camera, renderer.domElement );
@@ -437,7 +457,7 @@ function initParticles() {
 	});
 
 	emitter = new ShaderParticleEmitter({
-		position: new THREE.Vector3(0, 0, 0),
+		position: new THREE.Vector3(0, 0, 100),
         // positionSpread: new THREE.Vector3(2, 2, 2),
 
         acceleration: new THREE.Vector3(0, -5, 0),
@@ -562,6 +582,9 @@ function update() {
 		}
 	}
 
+	if (keyboard.pressed("q")) {
+		scene.remove( particleGroup.mesh );
+	}
 	if (keyboard.pressed("c")) {
 		allowMouseControls = true;
 	}
