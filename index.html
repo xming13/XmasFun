@@ -191,7 +191,7 @@ init();
 THREE.DefaultLoadingManager.onProgress = function ( item, loaded, total ) {
 
 	var percentDone = loaded / total * 90;
-	$('#progress-percent').html(percentDone + '%');
+	$('#progress-percent').html(Math.floor(percentDone) + '%');
 
 	if (loaded == total) {
 	 	try {
